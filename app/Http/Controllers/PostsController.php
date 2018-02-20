@@ -115,7 +115,34 @@ class PostsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate($request, [
+            'title' => 'required',
+            'description' => 'required'
+        ]);
+         // Handle File Upload
+        if($request->hasFile('picture')){
+            // Get filename with the extension
+            $filenameWithExt = $request->file('picture')->getClientOriginalName();
+            // Get just filename
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            // Get just ext
+            $extension = $request->file('picture')->getClientOriginalExtension();
+            // Filename to store
+            $fileNameToStore= $filename.'_'.time().'.'.$extension;
+            // Upload Image
+            $path = $request->file('picture')->storeAs('public/pictures', $fileNameToStore);
+        }
+        // Create Post
+        $post = Post::find($id);
+        $post->title = $request->input('title');
+        $post->description = $request->input('description');
+        if($request->hasFile('picture')){
+            $post->picture = $fileNameToStore;
+        }
+        $post->type = $request->input('type');
+        $post->tags = $request->input('tags');
+        $post->save();
+        return redirect('/posts')->with('success', 'Post Updated');
     }
 
     /**
@@ -126,6 +153,19 @@ class PostsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::find($id);
+        
+        // Check for correct user
+        if(auth()->user()->id !==$post->user_id){
+            return redirect('/posts')->with('error', 'Unauthorized Page');
+        }
+        
+        if($post->picture != 'noimage.jpg'){
+            // Delete Image
+            Storage::delete('public/pictures/'.$post->picture);
+        }
+        
+        $post->delete();
+        return redirect('/posts')->with('success', 'Post Removed');
     }
 }
