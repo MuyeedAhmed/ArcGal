@@ -8,6 +8,10 @@ use App\Post;
 
 class PostsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth', ['except'=>['index', 'show']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +19,9 @@ class PostsController extends Controller
      */
     public function index()
     {
-        //
+        //$posts = Post::all();
+        $posts = Post::orderBy('created_at', 'desc')->paginate(10);
+        return view('posts.index')->with('posts', $posts);
     }
 
     /**
@@ -81,7 +87,8 @@ class PostsController extends Controller
      */
     public function show($id)
     {
-        //
+        $post = Post::find($id);
+        return view('posts.show')->with('post', $post);
     }
 
     /**
@@ -92,7 +99,11 @@ class PostsController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::find($id);
+        if(auth()->user()->id !== $post->user_id){
+            return redirect('\posts')->with('error', 'Unauthorized Request');
+        }
+        return view('posts.edit')->with('post', $post);
     }
 
     /**

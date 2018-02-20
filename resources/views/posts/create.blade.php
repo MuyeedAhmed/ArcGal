@@ -15,9 +15,10 @@
             {{Form::textarea('description', '', ['id' => 'article-ckeditor', 'class' => 'form-control', 'placeholder' => 'Description'])}}
         </div>
         <div class="form-group">
+            {{Form::label('type', 'Type of Structure')}}
             {{Form::select('type', 
                 [
-                    'Skyscraper' => 'Large', 
+                    'Skyscraper' => 'Skyscraper', 
                     'Castle' => 'Castle',
                     'Palace' => 'Palace',
                     'Hotel' => 'Hotel',
